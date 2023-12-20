@@ -16,7 +16,7 @@ class CreateGenreMoviesTable extends Migration
         Schema::create('genre_movies', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->softDeletes(); // Adicionando a coluna deleted_at para suportar soft deletes
+            $table->softDeletes(); 
             $table->timestamps();
         });
     }

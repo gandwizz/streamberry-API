@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -12,6 +13,26 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
+
+
+//http:localhost:8000/api/users
+
+
+
+// Rota Privada
+$router->group(['middleware' => 'jwtApi'], function () use ($router) {
+    
+    $router->group(['prefix' => 'api'], function () use ($router) {
+        $router->get('users',  ['uses' => 'UserController@showAllUsers']);
+        $router->get('users/{id}', ['uses' => 'UserController@showOneUser']);
+        $router->post('users', ['uses' => 'UserController@create']);
+        $router->delete('users/{id}', ['uses' => 'UserController@delete']);
+        $router->put('users/{id}', ['uses' => 'UserController@update']);
+    });
+});
+
+
+
 
 Route::get('/', function () {
     return view('welcome');

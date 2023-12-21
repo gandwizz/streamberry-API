@@ -8,6 +8,7 @@ use App\Http\Controllers\StreamingController;
 use App\Http\Controllers\GenreMovieController;
 use App\Http\Controllers\MovieController;
 use App\Http\Controllers\AssessmentController;
+use App\Http\Controllers\MovieStreamingController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -54,7 +55,11 @@ use App\Http\Controllers\AssessmentController;
     $router->post('movie/restore/{id}', [MovieController::class, 'restore']);
 
     //MOVIE - STREAMING
-    $router->post('movie/{id}/streaming/{id_streaming}', [MovieController::class, 'addMovieStreaming']);
+    $router->post('movie/{id}/streaming/{id_streaming}', [MovieStreamingController::class, 'addMovieStreaming']);
+    $router->get('movies-streamings', [MovieStreaming::class, 'showAllMoviesInStreamings']); 
+    $router->delete('movie/{id}/streaming/{id_streaming}', [MovieStreaming::class, 'deleteMovieStreaming']);
+    $router->put('edit-movie-streaming', [MovieStreaming::class, 'update']);
+    $router->post('movie/{id}/streaming/{id_streaming}', [MovieStreaming::class, 'restore']);
 
     //ASSESSEMENTS
     $router->get('assessments', [AssessmentController::class, 'showAllAssessments']);

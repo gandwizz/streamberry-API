@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Movie;
 use App\Models\Streaming;
+use App\Models\MovieStreaming;
+
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Validator;
@@ -13,9 +15,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class MovieController extends Controller
 {
 
-    public function __construct(Movie $movie)
+    public function __construct(Movie $movie, MovieStreaming  $moviestreaming)
     {
         $this->movie = $movie;
+        $this->moviestreaming = $moviestreaming;
     }
 
     public function showAllMovies(Request $request)
@@ -196,26 +199,6 @@ class MovieController extends Controller
         } catch (\Throwable $th) {
             return ["error" => "Erro ao atualizar o filme!", "message" => $th->getMessage(), "success" => false];
         }
-    }
-
-
-    public function addMovieStreaming($id, $id_streaming)
-    {
-        try {
-            $movie = Movie::findOrFail($id);
-            $streaming = Streaming::findOrFail($id_streaming);
-    
-            if (!$movie->streamings()->where('streaming_id', $id_streaming)->exists()) {
-                $movie->streamings()->attach($streaming);
-                return ["message" => "Filme adicionado ao streaming com sucesso!", "success" => true];
-            } else {
-                return ["message" => "O filme já está associado a este streaming!", "success" => false];
-            }
-    
-        } catch (\Throwable $th) {
-            return ["error" => "Erro ao adicionar o filme ao streaming!", "message" => $th->getMessage(), "success" => false];
-        }
-    }
-    
+    }    
 
 }

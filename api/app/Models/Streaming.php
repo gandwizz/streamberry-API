@@ -9,7 +9,7 @@ class Streaming extends Model
 {
     use SoftDeletes;
 
-    protected $table = 'streaming';
+    protected $table = 'streamings';
     protected $guarded = ['id'];
     protected $fillable = [
         'name',
@@ -17,5 +17,10 @@ class Streaming extends Model
         'created_at',
         'updated_at'
     ];
+
+    public function movies()
+    {
+        return $this->belongsToMany(Movie::class, 'movies_streamings', 'streaming_id', 'movie_id');
+    }
 
 }

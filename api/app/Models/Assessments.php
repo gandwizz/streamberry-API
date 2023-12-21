@@ -14,11 +14,26 @@ class Assessments extends Model
     protected $fillable = [
         'movie_id',
         'user_id',
+        'streaming_id',
         'assessment',
         'comment',
         'deleted_at',
         'created_at',
         'updated_at'
     ];
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function movie()
+    {
+        return $this->belongsTo(Movie::class, 'movie_id');
+    }
+
+    public function streaming()
+    {
+        return $this->belongsTo(Streaming::class, 'streaming_id');
+    }
 
 }

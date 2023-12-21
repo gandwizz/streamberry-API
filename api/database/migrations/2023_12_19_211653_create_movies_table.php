@@ -18,7 +18,7 @@ class CreateMoviesTable extends Migration
             $table->string('name');
             $table->foreignId('streaming_id')->constrained('streamings');
             $table->foreignId('genre_movie_id')->constrained('genre_movies');
-            $table->string('synopsis');
+            $table->text('synopsis');
             $table->integer('month_release');
             $table->integer('year_release');
             $table->softDeletes(); 

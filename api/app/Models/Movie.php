@@ -13,7 +13,6 @@ class Movie extends Model
     protected $guarded = ['id'];
     protected $fillable = [
         'name',
-        'streaming_id',
         'genre_movie_id',
         'synopsis',
         'month_release',
@@ -22,5 +21,17 @@ class Movie extends Model
         'created_at',
         'updated_at'
     ];
+
+
+    public function streamings()
+    {
+        return $this->belongsToMany(Streaming::class, 'movies_streamings', 'movie_id', 'streaming_id');
+    }
+    
+
+    public function genres()
+    {
+        return $this->hasOne(GenreMovies::class, 'id', 'genre_movie_id');
+    }
 
 }

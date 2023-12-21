@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateAssessmentsTable extends Migration
+class CreateMoviesStreamingsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,14 +13,11 @@ class CreateAssessmentsTable extends Migration
      */
     public function up()
     {
-        Schema::create('assessments', function (Blueprint $table) {
+        Schema::create('movies_streamings', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('movie_id')->constrained('movies');
-            $table->foreignId('user_id')->constrained('users');
             $table->foreignId('streaming_id')->constrained('streamings');
-            $table->integer('assessment');
-            $table->text('comment');
-            $table->softDeletes();
+            $table->foreignId('movie_id')->constrained('movies');
+            $table->softDeletes(); 
             $table->timestamps();
         });
     }
@@ -32,6 +29,6 @@ class CreateAssessmentsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('assessments');
+        Schema::dropIfExists('movies_streamings');
     }
 }

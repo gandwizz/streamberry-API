@@ -1,66 +1,59 @@
-# streamberry-API
+# Streamberry-API
 
-Rota principal para pegar os dados entre filmes e streamings:  
+Esta é a documentação para a API Streamberry, que fornece informações sobre filmes, suas avaliações, lançamentos e muito mais.
 
-form completo:
-{
-    "ativo": true,
-    "movie_id": "",
-    "streaming_id": "",
-    "assessments": "",
-    "comment": "",
-    "month_release": "",
-    "year_release": ""
-}
+### 1. Consultar Disponibilidade de Streaming de um Filme
 
-OBS: O ativo refere-se aos filmes que estão ativos no streaming. 
+**Rota:** `/movies-streamings`  
+**Método:** `GET`
 
+Para verificar em quantos streamings um filme está disponível, utilize este endpoint e passe o `movie_id` no formulário para pesquisar.
 
-1. Em quantos Streamings um filme está disponível?
+### 2. Média de Avaliação de Cada Filme
 
-ROTA: /movies-streamings    MÉTODO:GET
-Passar no form { movie_id } que deseja procurar
+**Rota:** `/avarage-rating/{id}`  
+**Método:** `GET`
 
+Informe o `ID` do filme desejado para obter a média de avaliação correspondente.
 
-2. Qual a média de avaliação de cada filme?
+### 3. Filmes Lançados por Ano
 
-Rota: /avarage-rating/{id}  MÉTODO:GET
+**Rota:** `/movies-year`  
+**Método:** `GET`
 
-Do qual informa-se o ID do filme que quer saber a avaliação
+Se quiser saber quantos filmes e quais foram lançados em cada ano, utilize este endpoint. Pode-se passar o parâmetro `year_release` para pesquisar por um ano específico.
 
+### 4. Localizar Filmes por Avaliação e Comentários
 
-3. Quantos filmes e quais foram lançados em cada ano?
+**Rota:** `/movie`  
+**Método:** `GET`
 
-Rota: /movies-year  MÉTODO:GET
-Pode-se informar o year_release caso queira saber, entretanto, se não passar no form será trazido todos os filmes
+Utilize este endpoint para encontrar filmes com base em diferentes critérios como nome, gênero, sinopse, mês/ano de lançamento, avaliação e comentário. Preencha o formulário conforme necessário para obter os resultados desejados.
 
-
-4. Localizar filmes conforme avaliação e seus respectivos comentários
-
-ROTA: /movie  MÉTODO:GET
-
-basta utilizar o form da seguinte maneira e os filmes serão informados
-
+```json
 {
     "ativo": 1,
     "name": "",
     "genre_movie_id": "",
     "synopsis": "",
-    "month_release" :"",
-    "year_release" : "",
+    "month_release": "",
+    "year_release": "",
     "assessment": "",
     "comment": ""
 }
+````
 
-5. Quais são as avaliações médias de filmes agrupados por gênero conforme a época de lançamento
 
-Rota:  avarage-rating-gender   MÉTODO:GET
+### 5. Média de Avaliações de Filmes por Gênero e Ano de Lançamento
 
-Basta informar o ano e os filmes ativos para descorbri a avaliação média
+**Rota:** `/avarage-rating-gender`  
+**Método:** `GET`
 
+Informe o `year_release` desejado e os filmes ativos para descobrir a avaliação média agrupada por gênero.
+
+```json
 {
     "ativo": 1,
-    "year_release" : ""
+    "year_release": ""
 }
-
 

@@ -1,6 +1,6 @@
 # Streamberry-API
 
-Esta é a documentação para a API Streamberry, que fornece informações sobre filmes, suas avaliações, lançamentos e muito mais.
+Esta é a documentação para a API Streamberry, que trata-se de um desafio fornecido para a vaga de desenvolvedor PHP com Laravel.   
 
 ### 1. Consultar Disponibilidade de Streaming de um Filme
 

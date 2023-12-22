@@ -34,4 +34,9 @@ class Movie extends Model
         return $this->hasOne(GenreMovies::class, 'id', 'genre_movie_id');
     }
 
+    public function assessments()
+    {
+        return $this->hasMany(Assessments::class, 'movie_id');
+    }
+
 }

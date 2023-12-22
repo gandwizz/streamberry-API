@@ -49,6 +49,9 @@ use App\Http\Controllers\MovieStreamingController;
     // MOVIE
     $router->get('movie', [MovieController::class, 'showAllMovies']);
     $router->get('movie/{id}', [MovieController::class, 'showOneMovie']);
+    $router->get('avarage-rating/{id}', [MovieController::class, 'averageRatingMovies']);
+    $router->get('movies-year', [MovieController::class, 'moviesPerYear']);
+    $router->get('avarage-rating-gender', [MovieController::class, 'averageRatingsByGenreAndYear']);
     $router->post('movie', [MovieController::class, 'create']);
     $router->delete('movie/{id}', [MovieController::class, 'delete']);
     $router->put('movie/{id}', [MovieController::class, 'update']);
@@ -56,10 +59,10 @@ use App\Http\Controllers\MovieStreamingController;
 
     //MOVIE - STREAMING
     $router->post('movie/{id}/streaming/{id_streaming}', [MovieStreamingController::class, 'addMovieStreaming']);
-    $router->get('movies-streamings', [MovieStreaming::class, 'showAllMoviesInStreamings']); 
-    $router->delete('movie/{id}/streaming/{id_streaming}', [MovieStreaming::class, 'deleteMovieStreaming']);
-    $router->put('edit-movie-streaming', [MovieStreaming::class, 'update']);
-    $router->post('movie/{id}/streaming/{id_streaming}', [MovieStreaming::class, 'restore']);
+    $router->get('movies-streamings', [MovieStreamingController::class, 'showAllMoviesInStreamings']); 
+    $router->delete('movie/{id}/streaming/{id_streaming}', [MovieStreamingController::class, 'deleteMovieStreaming']);
+    $router->put('edit-movie-streaming', [MovieStreamingController::class, 'update']);
+    $router->post('movie/{id}/streaming/{id_streaming}', [MovieStreamingController::class, 'restore']);
 
     //ASSESSEMENTS
     $router->get('assessments', [AssessmentController::class, 'showAllAssessments']);

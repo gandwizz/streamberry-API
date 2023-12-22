@@ -37,102 +37,152 @@ class MovieStreamingController extends Controller
         }
     }
 
+
     public function showAllMoviesInStreamings(Request $request)
+    {
+        try {
+         $query = MovieStreaming::with([
+            'streaming', 
+            'movie', 
+            'movie.genres',
+            'movie.assessments',
+        ]);
+
+            if($request->has('ativo')){
+                $ativo = filter_var($request->ativo, FILTER_VALIDATE_BOOLEAN);
+
+                if ($ativo) {
+                    $query->whereNull('deleted_at');
+                } else {
+                    $query->onlyTrashed();
+                }
+            } 
+
+            $query->when($request->has('movie_id'), function ($query) use ($request) {
+                $query->whereHas('movie', function (Builder $query) use ($request) {
+                    $query->where('id', $request->movie_id);
+                });
+            });
+
+            $query->when($request->has('streaming_id'), function ($query) use ($request) {
+                $query->whereHas('streaming', function (Builder $query) use ($request) {
+                    $query->where('id', $request->streaming_id);
+                });
+            });
+
+            // $query->when($request->has('month_release'), function ($query) use ($request) {
+            //     $query->whereHas('movie', function (Builder $query) use ($request) {
+            //         $query->where('month_release', $request->month_release);
+            //     });
+            // });
+
+            // $query->when($request->has('year_release'), function ($query) use ($request) {
+            //     $query->whereHas('movie', function (Builder $query) use ($request) {
+            //         $query->where('year_release', $request->year_release);
+            //     });
+            // });
+
+            // $query->when($request->has('assessment'), function ($query) use ($request) {
+            //     $query->whereHas('movie.assessments', function (Builder $query) use ($request) {
+            //         $query->where('assessment', $request->assessment);
+            //     });
+            // });
+
+            // $query->when($request->has('comment'), function ($query) use ($request) {
+            //     $query->whereHas('movie.assessments', function (Builder $query) use ($request) {
+            //         $query->where('comment', 'like', '%' . $request->comment . '%');
+            //     });
+            // });
+
+            $result = $query->get();
+
+            if ($result->isEmpty()) {
+                $return = ["message" => "Nenhum filme encontrado!", "success" => false];
+            } else {
+                $return = ["message" => "Filmes encontrados com sucesso!", "movies" => $result, "success" => true];
+            }
+
+            return response()->json($return);
+        } catch (\Throwable $th) {
+            $return = ["error" => "Erro ao buscar filmes nos streamings!", "message" => $th->getMessage(), "success" => false];
+            return response()->json($return);
+        }
+    }
+
+
+
+
+
+
+public function update($id, Request $request)
 {
     try {
-        $query = $this->moviestreaming->with(['genreMovies', 'streaming']);   
+        $validator = Validator::make($request->all(), [
+            'movie_id' => 'required|integer',
+            'streaming_id' => 'required|integer',
+        ]);
 
-        if($request->has('ativo')){
-            $ativo = filter_var($request->ativo, FILTER_VALIDATE_BOOLEAN);
-
-            if ($ativo) {
-                $query->whereNull('deleted_at');
-            } else {
-                $query->onlyTrashed();
-            }
-        } 
-        
-        if (!empty($request->name)) {
-            $query->where('name', 'like', '%' . $request->name . '%');
+        if ($validator->fails()) {
+            return response()->json(['error' => 'Erro de validação', 'message' => $validator->errors(), 'success' => false], 422);
         }
 
-        // if (!empty($request->streaming_id)){
-        //     $query->wherehas('streaming', function (Builder $query) use ($request) {
-        //         $query->where('id', $request->streaming_id);
-        //     });
-        // }
+        $movieStreaming = MovieStreaming::findOrFail($id);
 
-        if (!empty($request->genre_movie_id)){
-            $query->wherehas('genres', function (Builder $query) use ($request) {
-                $query->where('id', $request->genre_movie_id);
-            });
+        if (!$movieStreaming) {
+            return ["message" => "Relação filme e streaming não encontrada!", "success" => false];
         }
 
-        if (!empty($request->synopsis)) {
-            $query->where('synopsis', 'like', '%' . $request->synopsis . '%');
+        $existingRelation = MovieStreaming::where('movie_id', $request->movie_id)
+            ->where('streaming_id', $request->streaming_id)
+            ->where('id', '!=', $id) 
+            ->exists();
+
+        if ($existingRelation) {
+            return ["message" => "Essa relação filme e streaming já existe!", "success" => false];
         }
 
-        if (!empty($request->month_release)) {
-            $query->where('month_release', $request->month_release);
-        }
+        $movieStreaming->update($request->all());
 
-        if (!empty($request->year_release)) {
-            $query->where('year_release', $request->year_release);
-        }
+        return ["message" => "Relação filme e streaming atualizada com sucesso!", "streaming" => $movieStreaming, "success" => true];
 
-
-        $movies = $query->get();
-
-        if ($movies->isEmpty()) {
-            $return = ["message" => "Nenhum filme encontrado!", "success" => true];
-        } else {
-            $return = ["message" => "Filmes encontrados com sucesso!", "movies" => $movies, "success" => true];
-        }
-
-        return response()->json($return);
     } catch (\Throwable $th) {
-        $return = ["error" => "Erro ao buscar filmes nos streamings!", "message" => $th->getMessage(), "success" => false];
-        return response()->json($return);
+        return ["error" => "Erro ao atualizar filme no streaming!", "message" => $th->getMessage(), "success" => false];
     }
 }
 
 public function deleteMovieStreaming($id, $id_streaming)
 {
     try {
-        // Implemente a lógica para excluir um filme de um streaming específico
-        // Use os IDs fornecidos para localizar e remover a associação
-        // Retorne uma mensagem apropriada de acordo com o resultado da operação
-        // Exemplo: return ["message" => "Operação de exclusão de filme em streaming", "success" => true];
+
+        $movie = MovieStreaming::where('movie_id', $id)->where('streaming_id', $id_streaming)->first();
+
+        if ($movie){
+            $movie->delete();
+            return ["message" => "Filme excluído do streaming com sucesso!", "success" => true];
+        } else {
+            return ["message" => "O filme não está associado a este streaming!", "success" => false];
+        }
+
     } catch (\Throwable $th) {
         return ["error" => "Erro ao excluir filme do streaming!", "message" => $th->getMessage(), "success" => false];
     }
 }
 
-public function update(Request $request)
-{
-    try {
-        // Implemente a lógica para atualizar os dados do filme em um streaming
-        // Receba os dados necessários do corpo da requisição
-        // Realize a atualização conforme os parâmetros fornecidos e retorne a resposta adequada
-        // Exemplo: return ["message" => "Operação de atualização de filme em streaming", "success" => true];
-    } catch (\Throwable $th) {
-        return ["error" => "Erro ao atualizar filme no streaming!", "message" => $th->getMessage(), "success" => false];
-    }
-}
 
 public function restore($id, $id_streaming)
 {
     try {
-        // Implemente a lógica para restaurar um filme em um streaming
-        // Use os IDs fornecidos para realizar a restauração, se aplicável
-        // Retorne uma mensagem apropriada de acordo com o resultado da operação
-        // Exemplo: return ["message" => "Operação de restauração de filme em streaming", "success" => true];
+        $movie = MovieStreaming::withTrashed()->where('movie_id', $id)->where('streaming_id', $id_streaming)->first();
+
+        if ($movie){
+            $movie->restore();
+            return ["message" => "Filme restaurado no streaming com sucesso!", "success" => true];
+        } else {
+            return ["message" => "O filme não está associado a este streaming!", "success" => false];
+        }
     } catch (\Throwable $th) {
         return ["error" => "Erro ao restaurar filme no streaming!", "message" => $th->getMessage(), "success" => false];
     }
 }
-
-
-    
 
 }

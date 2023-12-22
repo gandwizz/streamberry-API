@@ -145,7 +145,6 @@ class StreamingController extends Controller
     
             $streaming = Streaming::findOrFail($id);
     
-
             if ($streaming) {
 
                 $streaming->fill($request->all());

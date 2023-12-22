@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-Use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class MovieStreaming extends Model
 {
@@ -17,16 +17,13 @@ class MovieStreaming extends Model
         'movie_id',
     ];
 
-
-    public function streaming(){
-        return $this->hasMany(Streaming::class, 'id', 'streaming_id');
-    }
-    
-
-    public function genreMovies()
+    public function streaming()
     {
-        return $this->hasOne(GenreMovie::class, 'id', 'genre_movie_id');
+        return $this->belongsTo(Streaming::class, 'streaming_id', 'id');
     }
-    
 
+    public function movie()
+    {
+        return $this->belongsTo(Movie::class, 'movie_id', 'id');
+    }
 }

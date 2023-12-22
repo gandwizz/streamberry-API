@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 
 class MovieController extends Controller
 {
@@ -24,7 +25,7 @@ class MovieController extends Controller
     public function showAllMovies(Request $request)
     {
         try {
-            $query = $this->movie->with(['genres']);   
+            $query = $this->movie->with(['genres', 'assessments']);   
 
             if($request->has('ativo')){
                 $ativo = filter_var($request->ativo, FILTER_VALIDATE_BOOLEAN);
@@ -39,12 +40,6 @@ class MovieController extends Controller
             if (!empty($request->name)) {
                 $query->where('name', 'like', '%' . $request->name . '%');
             }
-
-            // if (!empty($request->streaming_id)){
-            //     $query->wherehas('streaming', function (Builder $query) use ($request) {
-            //         $query->where('id', $request->streaming_id);
-            //     });
-            // }
 
             if (!empty($request->genre_movie_id)){
                 $query->wherehas('genres', function (Builder $query) use ($request) {
@@ -62,6 +57,20 @@ class MovieController extends Controller
 
             if (!empty($request->year_release)) {
                 $query->where('year_release', $request->year_release);
+            }
+
+  
+            if (!empty($request->assessment)) {
+                $query->whereHas('assessments', function (Builder $query) use ($request) {
+                    $query->where('assessment', $request->assessment);
+                });
+            }
+    
+            // Adicionando filtro para comment
+            if (!empty($request->comment)) {
+                $query->whereHas('assessments', function (Builder $query) use ($request) {
+                    $query->where('comment', 'like', '%' . $request->comment . '%');
+                });
             }
 
     
@@ -199,6 +208,117 @@ class MovieController extends Controller
         } catch (\Throwable $th) {
             return ["error" => "Erro ao atualizar o filme!", "message" => $th->getMessage(), "success" => false];
         }
-    }    
+    } 
+    
+    
+    public function averageRatingMovies($id)
+    {
+        try {
+            $movie = Movie::with('assessments')->find($id);
+    
+            if ($movie) {
+                $averageRating = $movie->assessments->avg('assessment');
+                return [
+                    "message" => "Média de avaliações do filme encontrada com sucesso!",
+                    "average_rating" => $averageRating,
+                    "success" => true
+                ];
+            } else {
+                return ["message" => "Filme não encontrado!", "success" => false];
+            }
+    
+        } catch (\Throwable $th) {
+            return ["error" => "Erro ao buscar a média de avaliações do filme!", "message" => $th->getMessage(), "success" => false];
+        }
+    }
+
+
+    // Quantos filmes e quais foram lançados em cada ano?
+
+    public function moviesPerYear(Request $request)
+    {
+        try {
+            $query = Movie::query();
+    
+            $year = $request->input('year_release');
+    
+            $query->when($year, function ($query) use ($year) {
+                $query->where('year_release', $year);
+            });
+    
+            $query->whereNotNull('year_release');
+    
+            $movies = $query->get();
+    
+            $groupedMovies = $movies->groupBy('year_release');
+    
+            // Conta o número de filmes em cada ano
+            $moviesPerYear = $groupedMovies->map(function ($movies, $year) {
+                return [
+                    'movies' => $movies,
+                    'release_year' => $year,
+                    'movie_count' => count($movies),
+                ];
+            });
+    
+            $return = [
+                "message" => "Contagem de filmes por ano encontrada com sucesso!",
+                "movies_per_year" => $moviesPerYear,
+                "success" => true,
+            ];
+    
+            return response()->json($return);
+        } catch (\Throwable $th) {
+            $return = ["error" => "Erro ao buscar a contagem de filmes por ano!", "message" => $th->getMessage(), "success" => false];
+            return response()->json($return);
+        }
+    }
+    public function averageRatingsByGenreAndYear(Request $request)
+    {
+        try {
+            $query = Movie::query();
+    
+            // Adicionando filtros opcionais para ativo, nome, gênero, sinopse, mês de lançamento e ano de lançamento
+            $query->when($request->has('ativo'), function ($query) use ($request) {
+                $ativo = filter_var($request->ativo, FILTER_VALIDATE_BOOLEAN);
+                $query->whereNull($ativo ? 'movies.deleted_at' : 'movies.deleted_at');
+            });
+    
+            $query->when(!empty($request->genre_movie_id), function ($query) use ($request) {
+                $query->where('movies.genre_movie_id', $request->genre_movie_id);
+            });
+    
+    
+            $query->when(!empty($request->year_release), function ($query) use ($request) {
+                $query->where('movies.year_release', $request->year_release);
+            });
+    
+            $query->select('genre_movies.name as genre', DB::raw('AVG(assessments.assessment) as average_rating'))
+                ->leftJoin('assessments', 'movies.id', '=', 'assessments.movie_id')
+                ->leftJoin('genre_movies', 'movies.genre_movie_id', '=', 'genre_movies.id')
+                ->whereNull('movies.deleted_at') // Ajuste aqui
+                ->groupBy('genre_movies.name');
+    
+            $result = $query->get();
+    
+            if ($result->isEmpty()) {
+                $return = ["message" => "Nenhuma avaliação encontrada!", "success" => true];
+            } else {
+                $return = ["message" => "Avaliações médias encontradas com sucesso!", "ratings_by_genre_and_year" => $result, "success" => true];
+            }
+    
+            return response()->json($return);
+        } catch (\Throwable $th) {
+            $return = ["error" => "Erro ao buscar as avaliações médias!", "message" => $th->getMessage(), "success" => false];
+            return response()->json($return);
+        }
+    }
+    
+
+    
+    
+    
+    
+    
 
 }

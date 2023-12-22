@@ -12,18 +12,27 @@ class MovieStreaming extends Model
     protected $table = 'movies_streamings';
     protected $guarded = ['id'];
     protected $fillable = [
-        'name',
         'streaming_id',
-        'movie_id',
+        'movie_id'
     ];
 
-    public function streaming()
+    // public function streaming()
+    // {
+    //     return $this->belongsToMany(Streaming::class, 'streaming_id', 'id');
+    // }
+
+    // public function movie()
+    // {
+    //     return $this->belongsToMany(Movie::class, 'movie_id', 'id');
+    // }
+
+    public function streamings()
     {
-        return $this->belongsTo(Streaming::class, 'streaming_id', 'id');
+        return $this->hasMany(Streaming::class, 'id', 'streaming_id');
     }
 
-    public function movie()
+    public function movies()
     {
-        return $this->belongsTo(Movie::class, 'movie_id', 'id');
+        return $this->hasMany(Movie::class, 'id', 'movie_id');
     }
 }

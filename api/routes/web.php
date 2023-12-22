@@ -58,11 +58,11 @@ use App\Http\Controllers\MovieStreamingController;
     $router->post('movie/restore/{id}', [MovieController::class, 'restore']);
 
     //MOVIE - STREAMING
-    $router->post('movie/{id}/streaming/{id_streaming}', [MovieStreamingController::class, 'addMovieStreaming']);
     $router->get('movies-streamings', [MovieStreamingController::class, 'showAllMoviesInStreamings']); 
+    $router->post('movie/{id}/streaming/{id_streaming}', [MovieStreamingController::class, 'addMovieStreaming']);
     $router->delete('movie/{id}/streaming/{id_streaming}', [MovieStreamingController::class, 'deleteMovieStreaming']);
     $router->put('edit-movie-streaming', [MovieStreamingController::class, 'update']);
-    $router->post('movie/{id}/streaming/{id_streaming}', [MovieStreamingController::class, 'restore']);
+    // $router->post('movie/{id}/streaming/{id_streaming}', [MovieStreamingController::class, 'restore']);
 
     //ASSESSEMENTS
     $router->get('assessments', [AssessmentController::class, 'showAllAssessments']);

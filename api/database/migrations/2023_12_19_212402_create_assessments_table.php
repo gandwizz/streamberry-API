@@ -17,7 +17,6 @@ class CreateAssessmentsTable extends Migration
             $table->id();
             $table->foreignId('movie_id')->constrained('movies');
             $table->foreignId('user_id')->constrained('users');
-            $table->foreignId('streaming_id')->constrained('streamings');
             $table->integer('assessment');
             $table->text('comment');
             $table->softDeletes();

@@ -25,7 +25,7 @@ class MovieController extends Controller
     public function showAllMovies(Request $request)
     {
         try {
-            $query = $this->movie->with(['genres', 'assessments']);   
+            $query = $this->movie->with(['genres', 'assessments', 'streamings']);   
 
             if($request->has('ativo')){
                 $ativo = filter_var($request->ativo, FILTER_VALIDATE_BOOLEAN);
@@ -36,7 +36,11 @@ class MovieController extends Controller
                     $query->onlyTrashed();
                 }
             } 
-            
+
+            if (!empty($request->id)) {
+                $query->where('id', $request->id );
+            }
+
             if (!empty($request->name)) {
                 $query->where('name', 'like', '%' . $request->name . '%');
             }
@@ -46,6 +50,12 @@ class MovieController extends Controller
                     $query->where('id', $request->genre_movie_id);
                 });
             }
+
+            $query->when($request->has('month_release'), function ($query) use ($request) {
+                $query->whereHas('movie', function (Builder $query) use ($request) {
+                    $query->where('month_release', $request->month_release);
+                });
+            });
 
             if (!empty($request->synopsis)) {
                 $query->where('synopsis', 'like', '%' . $request->synopsis . '%');
